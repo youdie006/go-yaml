@@ -674,6 +674,12 @@ func isTimestamp(value string) bool {
 	return false
 }
 
+// isIndicatorValue reports whether value would be read back as an indicator
+// rather than a string: "-" (sequence entry) or "<<" (merge key).
+func isIndicatorValue(value string) bool {
+	return value == "-" || value == "<<"
+}
+
 // IsNeedQuoted checks whether the value needs quote for passed string or not
 func IsNeedQuoted(value string) bool {
 	if value == "" {
@@ -682,15 +688,10 @@ func IsNeedQuoted(value string) bool {
 	if _, exists := reservedEncKeywordMap[value]; exists {
 		return true
 	}
-	// "<<" is the YAML merge-key indicator; emitting it unquoted would make it
-	// be re-parsed as a merge key instead of a plain string. See #917.
-	if value == "<<" {
-		return true
-	}
 	if isNumber(value) {
 		return true
 	}
-	if value == "-" {
+	if isIndicatorValue(value) {
 		return true
 	}
 	first := value[0]
